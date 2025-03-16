@@ -12,12 +12,13 @@ Roadmap:
   1. Projekt setup
      - Projekt létrehozása ✅
      - GitHub repo ✅
-     - MVVM struktúra létrehozása package szinten
-     - Szükséges függőségek hozzáadása
+     - MVVM struktúra létrehozása package szinten ✅
+     - Szükséges függőségek hozzáadása ✅
   2. API és adatok kezelése
-     - Futball API kiválasztása
+     - Futball API kiválasztása ✅ -> API-Football (api-football.com)
      - Retrofit beállítása
      - Data modellek létrehozása
+     - Repository pattern
   4. UI dizájn
      - Fő UI képernyők elkészítése
          - Főképernyő bejelentkezéshez
