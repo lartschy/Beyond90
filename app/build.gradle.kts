@@ -88,6 +88,7 @@ dependencies {
     // Compose dependencies
     implementation("androidx.navigation:navigation-compose")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose")
+    implementation("androidx.compose.material:material-icons-extended:1.4.3")
 
     // Firebase
     implementation("com.google.firebase:firebase-auth-ktx:21.1.0")

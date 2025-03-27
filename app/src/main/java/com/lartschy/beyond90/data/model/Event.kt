@@ -7,7 +7,7 @@ data class Event(
     @SerializedName("strEvent") val matchName: String,
     @SerializedName("dateEvent") val date: String,
     @SerializedName("strTime") val time: String,
-    @SerializedName("strThumb") val thumbnail: String? // Optional image
+    @SerializedName("strThumb") val thumbnail: String?
 )
 
 data class EventsResponse(
