@@ -20,37 +20,37 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
-        BottomNavItem("fixtures", Icons.Default.DateRange, "Fixtures"),
         BottomNavItem("leagues", Icons.Default.Star, "Leagues"),
-        BottomNavItem("teams", Icons.Default.SportsSoccer, "Teams"),
+        BottomNavItem("fixtures", Icons.Default.DateRange, "Fixtures"),
         BottomNavItem("profile", Icons.Default.Person, "Profile")
     )
 
     NavigationBar(
         modifier = Modifier.height(56.dp),
-        containerColor = Color(0xFFFFFFFF)
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
         items.forEach { item ->
             val isSelected = item.route == currentBackStackEntry.value?.destination?.route
 
-            // Customizing icon and label color based on selected state
-            val iconColor = if (isSelected) Color.Gray else Color.Black
-            val labelColor = if (isSelected) Color.Gray else Color.Black
+            val iconColor = if (isSelected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onBackground
+
+            val labelColor = iconColor
 
             NavigationBarItem(
                 icon = {
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        tint = iconColor // Set icon color here
+                        tint = iconColor
                     )
                 },
                 label = {
                     Text(
                         text = item.label,
-                        color = labelColor // Set label color here
+                        color = labelColor
                     )
                 },
                 selected = isSelected,
@@ -65,5 +65,6 @@ fun BottomNavigationBar(navController: NavController) {
         }
     }
 }
+
 
 data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)

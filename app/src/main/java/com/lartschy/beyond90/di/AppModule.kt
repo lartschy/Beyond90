@@ -1,7 +1,6 @@
 package com.lartschy.beyond90.di
 
-
-import com.lartschy.beyond90.data.remote.FootballApi
+import com.lartschy.beyond90.data.remote.FootballApiService
 import com.lartschy.beyond90.data.repository.FootballRepository
 import dagger.Module
 import dagger.Provides
@@ -17,17 +16,21 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFootballApi(): FootballApi {
+    fun provideLeagueApi(): FootballApiService {
         return Retrofit.Builder()
             .baseUrl("https://www.thesportsdb.com/api/v1/json/3/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(FootballApi::class.java)
+            .create(FootballApiService::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideFootballRepository(api: FootballApi): FootballRepository {
-        return FootballRepository(api)
+    fun provideLeagueRepository(
+        footballApiService: FootballApiService
+    ): FootballRepository {
+        return FootballRepository(footballApiService)
     }
+
 }
+
