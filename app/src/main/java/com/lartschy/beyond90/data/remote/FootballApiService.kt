@@ -15,14 +15,6 @@ interface FootballApiService {
         @Query("l") leagueName: String
     ): TeamResponse
 
-    @GET("eventsnextleague.php")
-    suspend fun getNextEventsForLeague(
-        @Query("id") leagueId: String
-    ): MatchResponse
-
     @GET("searchevents.php")
     suspend fun searchMatch(@Query("e") query: String): MatchResponse
-
-
-
 }

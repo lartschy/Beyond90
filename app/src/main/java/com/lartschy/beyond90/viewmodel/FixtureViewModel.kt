@@ -40,7 +40,7 @@ class FixtureViewModel @Inject constructor(
     val matchResults: StateFlow<List<Match>> = _matchResults
 
     init {
-        fetchLeagues() // fetch leagues on initialization
+        fetchLeagues()
     }
 
     private fun fetchLeagues() {

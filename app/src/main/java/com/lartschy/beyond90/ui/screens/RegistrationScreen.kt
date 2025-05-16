@@ -1,8 +1,8 @@
 package com.lartschy.beyond90.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +18,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -42,31 +39,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.lartschy.beyond90.viewmodel.AuthViewModel
 
+
 @Composable
-fun HomeScreen(navController: NavController) {
+fun RegistrationScreen(navController: NavController) {
     val authViewModel: AuthViewModel = viewModel()
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
 
+    var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var confirmPassword by remember { mutableStateOf("") }
 
     val cornerRadius = 16.dp
-
-    LaunchedEffect(authState) {
-        authState?.let { message ->
-            if (message.contains("successful", ignoreCase = true)) {
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                navController.navigate("leagues")
-                errorMessage = null
-            } else {
-                errorMessage = message
-            }
-            authViewModel.clearState()
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -75,17 +60,29 @@ fun HomeScreen(navController: NavController) {
         contentAlignment = Alignment.Center
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Welcome to Beyond90",
-                fontFamily = FontFamily.SansSerif,
-                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onBackground
+                text = "Register",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedTextField(
+                value = fullName,
+                onValueChange = { fullName = it },
+                label = { Text("Full Name") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(cornerRadius)),
+                shape = RoundedCornerShape(cornerRadius)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = email,
@@ -99,53 +96,67 @@ fun HomeScreen(navController: NavController) {
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(cornerRadius)),
-                shape = RoundedCornerShape(cornerRadius)
+                shape = RoundedCornerShape(cornerRadius),
+                visualTransformation = PasswordVisualTransformation()
             )
 
-            errorMessage?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = it,
-                    color = Color.Red,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Confirm Password") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(cornerRadius)),
+                shape = RoundedCornerShape(cornerRadius),
+                visualTransformation = PasswordVisualTransformation()
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    if (email.isBlank() || password.isBlank()) {
-                        Toast.makeText(context, "Email and password cannot be empty", Toast.LENGTH_SHORT).show()
+                    if (fullName.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    } else if (password != confirmPassword) {
+                        Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
                     } else {
-                        authViewModel.login(email.trim(), password)
+                        authViewModel.register(email, password)
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(cornerRadius)),
-                shape = RoundedCornerShape(cornerRadius),
-                enabled = email.isNotBlank() && password.isNotBlank()
+                shape = RoundedCornerShape(cornerRadius)
             ) {
-                Text("Login")
+                Text("Register")
+            }
+
+            authState?.let { message ->
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                if (message.contains("successful", ignoreCase = true)) {
+                    navController.navigate("leagues")
+                }
+                authViewModel.clearState()
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
                 onClick = {
-                    navController.navigate("registration")
+                    navController.popBackStack("home", inclusive = false)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -156,9 +167,8 @@ fun HomeScreen(navController: NavController) {
                     contentColor = Color(0xFF4CAF50)
                 )
             ) {
-                Text("Register")
+                Text("Back to Login")
             }
         }
     }
 }
-

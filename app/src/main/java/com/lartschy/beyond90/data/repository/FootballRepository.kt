@@ -18,11 +18,7 @@ class FootballRepository(private val apiService: FootballApiService) {
         return response.teams
     }
 
-
     suspend fun searchMatch(query: String): MatchResponse? {
         return apiService.searchMatch(query)
     }
-
-
-
 }

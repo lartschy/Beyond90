@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.lartschy.beyond90" />
+                  <option name="mobileSdkAppId" value="1:854722367200:android:fa746c19df8b508803ca85" />
+                  <option name="projectId" value="beyond90-d771d" />
+                  <option name="projectNumber" value="854722367200" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

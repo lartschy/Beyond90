@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854722367200",
+    "project_id": "beyond90-d771d",
+    "storage_bucket": "beyond90-d771d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854722367200:android:fa746c19df8b508803ca85",
+        "android_client_info": {
+          "package_name": "com.lartschy.beyond90"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHXJWQU1U_IXFM7KGTLBd4PTiMgT8yDaw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

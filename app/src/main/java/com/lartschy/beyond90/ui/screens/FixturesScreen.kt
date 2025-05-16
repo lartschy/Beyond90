@@ -36,7 +36,6 @@ fun FixtureScreen(
             .padding(16.dp)
     ) {
 
-        // League selection (Full width with horizontal padding)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -69,7 +68,6 @@ fun FixtureScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Teams selection
         if (selectedLeague.value != null) {
             if (isLoading) {
                 Box(
@@ -87,7 +85,6 @@ fun FixtureScreen(
                         .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Team 1 Selector
                     Box(modifier = Modifier.weight(1f)) {
                         OutlinedButton(
                             onClick = { expandedTeam1.value = !expandedTeam1.value },
@@ -114,8 +111,6 @@ fun FixtureScreen(
                             }
                         }
                     }
-
-                    // Team 2 Selector
                     Box(modifier = Modifier.weight(1f)) {
                         OutlinedButton(
                             onClick = { expandedTeam2.value = !expandedTeam2.value },
@@ -147,7 +142,6 @@ fun FixtureScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Fetch button
         Button(
             onClick = { fixtureViewModel.fetchMatchDataIfReady() },
             enabled = selectedTeam1.value != null && selectedTeam2.value != null,
@@ -160,7 +154,6 @@ fun FixtureScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Results
         if (matchResults.isNotEmpty()) {
             Text(
                 text = "Matches found: ${matchResults.size}",

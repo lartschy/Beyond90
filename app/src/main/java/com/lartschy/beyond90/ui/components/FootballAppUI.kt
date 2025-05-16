@@ -11,8 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.lartschy.beyond90.ui.screens.FixtureScreen
+import com.lartschy.beyond90.ui.screens.HomeScreen
 import com.lartschy.beyond90.ui.screens.LeagueScreen
 import com.lartschy.beyond90.ui.screens.ProfileScreen
+import com.lartschy.beyond90.ui.screens.RegistrationScreen
 import com.lartschy.beyond90.ui.screens.TeamScreen
 import com.lartschy.beyond90.viewmodel.FixtureViewModel
 
@@ -20,10 +22,14 @@ import com.lartschy.beyond90.viewmodel.FixtureViewModel
 @Composable
 fun FootballAppUI() {
     val navController = rememberNavController()
-    val fixtureViewModel: FixtureViewModel = viewModel() // <- Shared instance
+    val fixtureViewModel: FixtureViewModel = viewModel()
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = {
+            if (navController.currentBackStackEntryAsState().value?.destination?.route != "home" && navController.currentBackStackEntryAsState().value?.destination?.route != "registration") {
+                BottomNavigationBar(navController)
+            }
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -32,8 +38,12 @@ fun FootballAppUI() {
         ) {
             NavHost(
                 navController = navController,
-                startDestination = "leagues"
+                startDestination = "home"
             ) {
+                composable("home") { HomeScreen(navController) }
+
+                composable("registration") { RegistrationScreen(navController) }
+
                 composable("leagues") { LeagueScreen(navController) }
 
                 composable("teams/{leagueName}") { backStackEntry ->
@@ -45,8 +55,9 @@ fun FootballAppUI() {
                     FixtureScreen(fixtureViewModel)
                 }
 
-                composable("profile") { ProfileScreen() }
+                composable("profile") { ProfileScreen(navController) }
             }
+
         }
     }
 }
