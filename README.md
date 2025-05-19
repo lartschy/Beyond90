@@ -10,25 +10,27 @@ Technológiák:
 
 Roadmap:
   1. Projekt setup
-     - Projekt létrehozása ✅
-     - GitHub repo ✅
-     - MVVM struktúra létrehozása package szinten ✅
-     - Szükséges függőségek hozzáadása ✅
+     - Projekt létrehozása 
+     - GitHub repo 
+     - MVVM struktúra létrehozása package szinten 
+     - Szükséges függőségek hozzáadása 
   2. API és adatok kezelése
-     - Futball API kiválasztása ✅ -> API-Football (api-football.com)
+     - Futball API kiválasztása -> [API-Football (api-football.com)](https://www.thesportsdb.com/free_sports_api)
      - Retrofit beállítása
      - Data modellek létrehozása
      - Repository pattern
+  3. ViewModellek
+     - A megjelenő adatokhoz
+     - Autentikációhoz
   4. UI dizájn
      - Fő UI képernyők elkészítése
-         - Főképernyő bejelentkezéshez
-         - Home: következő meccsek
-         - Meccs részletek
-         - Csapat oldal
+         - Főképernyő bejelentkezéshez + regisztrációs oldal
+         - Liga oldal -> Csapat oldal
+         - Meccsek 
          - Felhasználó profilja
-     - Egyes képernyők közötti navigáció 
-     - Egyes képernyők dizájnja
-  6. Firebase authentikáció
+     - Egyes képernyők közötti navigáció, alsó navigációs menü
+     - Egyes képernyők dizájnja, újrafelhasználható elemek kiszervezése külön fájlokba
+  5. Firebase authentikáció
      - Firebase projekt
      - Implementáció
-( 5. Room DB, ha szükséges )
+
