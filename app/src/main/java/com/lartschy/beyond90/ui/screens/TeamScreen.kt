@@ -29,6 +29,7 @@ import com.lartschy.beyond90.viewmodel.TeamViewModel
 fun TeamScreen(leagueName: String, viewModel: TeamViewModel = hiltViewModel()) {
     val teams by viewModel.teams.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val favorites by viewModel.favoriteTeams.collectAsState()
 
     LaunchedEffect(leagueName) {
         viewModel.fetchTeams(leagueName)
@@ -55,10 +56,13 @@ fun TeamScreen(leagueName: String, viewModel: TeamViewModel = hiltViewModel()) {
                 else -> {
                     LazyColumn {
                         items(teams) { team ->
-                            TeamCard(team)
+                            TeamCard(
+                                team = team,
+                                isFavorite = favorites.contains(team.idTeam),
+                                onToggleFavorite = { viewModel.toggleFavorite(it) }
+                            )
                         }
                     }
-
                 }
             }
         }

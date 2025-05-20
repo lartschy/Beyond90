@@ -82,8 +82,11 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
-    // Firebase Auth (compatible with Kotlin 1.9.20)
+    // Firebase Auth
     implementation("com.google.firebase:firebase-auth:22.3.1")
+
+    // Firebase DB
+    implementation("com.google.firebase:firebase-firestore-ktx:24.10.3")
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.4.0")

@@ -7,15 +7,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
+import com.lartschy.beyond90.data.model.Team
+import com.lartschy.beyond90.ui.screens.FavouriteTeamScreen
 import com.lartschy.beyond90.ui.screens.FixtureScreen
 import com.lartschy.beyond90.ui.screens.HomeScreen
 import com.lartschy.beyond90.ui.screens.LeagueScreen
 import com.lartschy.beyond90.ui.screens.ProfileScreen
 import com.lartschy.beyond90.ui.screens.RegistrationScreen
 import com.lartschy.beyond90.ui.screens.TeamScreen
+import com.lartschy.beyond90.viewmodel.FavoritesViewModel
 import com.lartschy.beyond90.viewmodel.FixtureViewModel
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -23,10 +30,17 @@ import com.lartschy.beyond90.viewmodel.FixtureViewModel
 fun FootballAppUI() {
     val navController = rememberNavController()
     val fixtureViewModel: FixtureViewModel = viewModel()
+    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    val favoriteTeams by favoritesViewModel.favoriteTeams.collectAsState()
+
+    LaunchedEffect(Unit) {
+        favoritesViewModel.fetchFavoriteTeams()
+    }
 
     Scaffold(
         bottomBar = {
-            if (navController.currentBackStackEntryAsState().value?.destination?.route != "home" && navController.currentBackStackEntryAsState().value?.destination?.route != "registration") {
+            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+            if (currentRoute != "home" && currentRoute != "registration") {
                 BottomNavigationBar(navController)
             }
         }
@@ -55,9 +69,19 @@ fun FootballAppUI() {
                     FixtureScreen(fixtureViewModel)
                 }
 
-                composable("profile") { ProfileScreen(navController) }
-            }
+                composable("profile") {
+                    ProfileScreen(navController = navController, favoritesViewModel = favoritesViewModel)
+                }
 
+                composable("favouriteTeam/{teamId}") { backStackEntry ->
+                    val teamId = backStackEntry.arguments?.getString("teamId")
+                    val team = favoriteTeams.find { it.idTeam == teamId }
+
+                    team?.let {
+                        FavouriteTeamScreen(team = it)
+                    }
+                }
+            }
         }
     }
 }

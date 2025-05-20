@@ -21,4 +21,12 @@ class FootballRepository(private val apiService: FootballApiService) {
     suspend fun searchMatch(query: String): MatchResponse? {
         return apiService.searchMatch(query)
     }
+
+    suspend fun getAllTeams(): List<Team> {
+        val leagues = getAllLeagues()
+        return leagues.flatMap { league ->
+            getTeamsByLeagueName(league.strLeague)
+        }
+    }
+
 }
