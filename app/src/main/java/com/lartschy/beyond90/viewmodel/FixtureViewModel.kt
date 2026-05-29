@@ -12,116 +12,83 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+
+enum class MatchFilter { ALL, UPCOMING, HISTORY }
 
 @HiltViewModel
 class FixtureViewModel @Inject constructor(
     private val repository: FootballRepository
 ) : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    val leagues = MutableStateFlow<List<League>>(emptyList())
+    val teams = MutableStateFlow<List<Team>>(emptyList())
+    private val allMatches = MutableStateFlow<List<Match>>(emptyList()) // unfiltered
+    val matchResults = MutableStateFlow<List<Match>>(emptyList()) // filtered
+    val isLoading = MutableStateFlow(false)
 
-    private val _leagues = MutableStateFlow<List<League>>(emptyList())
-    val leagues: StateFlow<List<League>> = _leagues
+    var selectedLeague = MutableStateFlow<League?>(null)
+    var selectedTeam1 = MutableStateFlow<Team?>(null)
+    var selectedTeam2 = MutableStateFlow<Team?>(null)
+    var selectedFilter = MutableStateFlow(MatchFilter.ALL)
 
-    private val _teamsForSelectedLeague = MutableStateFlow<List<Team>>(emptyList())
-    val teamsForSelectedLeague: StateFlow<List<Team>> = _teamsForSelectedLeague
+    init { fetchLeagues() }
 
-    private val _selectedTeam1 = MutableStateFlow<Team?>(null)
-    val selectedTeam1: StateFlow<Team?> = _selectedTeam1
-
-    private val _selectedTeam2 = MutableStateFlow<Team?>(null)
-    val selectedTeam2: StateFlow<Team?> = _selectedTeam2
-
-    private val _matchResults = MutableStateFlow<List<Match>>(emptyList())
-    val matchResults: StateFlow<List<Match>> = _matchResults
-
-    init {
-        fetchLeagues()
+    private fun fetchLeagues() = viewModelScope.launch {
+        isLoading.value = true
+        leagues.value = repository.getAllLeagues()
+        isLoading.value = false
     }
 
-    private fun fetchLeagues() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val result = repository.getAllLeagues()
-                _leagues.value = result
-            } catch (e: Exception) {
-                Log.e("FixtureViewModel", "Error fetching leagues", e)
-            } finally {
-                _isLoading.value = false
-            }
+    fun fetchTeamsForLeague(league: League) = viewModelScope.launch {
+        isLoading.value = true
+        teams.value = repository.getTeamsByLeague(league.strLeague)
+        selectedTeam1.value = null
+        selectedTeam2.value = null
+        isLoading.value = false
+    }
+
+    fun fetchMatches() = viewModelScope.launch {
+        val team1 = selectedTeam1.value ?: return@launch
+        val team2 = selectedTeam2.value ?: return@launch
+
+        isLoading.value = true
+        val matches = repository.searchMatch(team1.strTeam, team2.strTeam) +
+                repository.searchMatch(team2.strTeam, team1.strTeam)
+        allMatches.value = matches
+        applyFilter()
+        isLoading.value = false
+    }
+
+    fun applyFilter() {
+        val filter = selectedFilter.value
+        val today = LocalDate.now()
+
+        matchResults.value = when (filter) {
+            MatchFilter.ALL -> allMatches.value
+            MatchFilter.UPCOMING -> allMatches.value.filter { isUpcoming(it, today) }
+            MatchFilter.HISTORY -> allMatches.value.filter { !isUpcoming(it, today) }
         }
     }
 
-    fun fetchTeamsForLeague(league: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val teams = repository.getTeamsByLeagueName(league)
-                _teamsForSelectedLeague.value = teams
-                if (teams.isNotEmpty()) {
-                    _selectedTeam1.value = teams.first()
-                    Log.d("FixtureViewModel", "Selected team1: ${teams.first().strTeam}")
-                } else {
-                    Log.w("FixtureViewModel", "No teams found for league: $league")
-                }
-            } catch (e: Exception) {
-                Log.e("FixtureViewModel", "Error fetching teams", e)
-            } finally {
-                _isLoading.value = false
-            }
+    fun isUpcoming(match: Match, today: LocalDate = LocalDate.now()): Boolean {
+        val raw = match.dateEvent ?: match.dateEventLocal ?: match.strDate ?: return false
+
+        return try {
+            val date = LocalDate.parse(raw.substring(0, 10))
+            date >= today
+        } catch (e: Exception) {
+            false
         }
     }
 
-    fun setSelectedTeam1(team: Team) {
-        _selectedTeam1.value = team
+
+    fun getMatchById(id: String): Match? {
+        return matchResults.value.find { it.idEvent == id }
     }
 
-    fun setSelectedTeam2(team: Team) {
-        _selectedTeam2.value = team
-    }
 
-    fun fetchMatchDataIfReady() {
-        val team1 = _selectedTeam1.value
-        val team2 = _selectedTeam2.value
-
-        if (team1 == null || team2 == null) {
-            Log.w("FixtureViewModel", "Cannot fetch match: one or both teams not selected.")
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val query = "${team1.strTeam} vs ${team2.strTeam}"
-                Log.d("FixtureViewModel", "Fetching match data for query: $query")
-                val result = repository.searchMatch(query)
-                val matches = result?.event ?: emptyList()
-                Log.d("FixtureViewModel", "Match search result: ${matches.size} events found.")
-
-                val formattedMatches = matches.map { match ->
-                    match.copy(
-                        strTime = match.strTime?.let { formatTimeToHourMinute(it) }
-                    )
-                }
-                _matchResults.value = formattedMatches
-
-            } catch (e: Exception) {
-                Log.e("FixtureViewModel", "Error fetching match data", e)
-            }
-        }
-    }
-}
-
-private fun formatTimeToHourMinute(time: String): String {
-    return try {
-        val inputFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
-        val outputFormat = DateTimeFormatter.ofPattern("HH:mm")
-        LocalTime.parse(time, inputFormat).format(outputFormat)
-    } catch (e: Exception) {
-        time
-    }
 }

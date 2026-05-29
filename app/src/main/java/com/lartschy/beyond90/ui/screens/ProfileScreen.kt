@@ -1,5 +1,5 @@
 package com.lartschy.beyond90.ui.screens
-
+/*
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -116,3 +116,4 @@ fun ProfileScreen(
         }
     }
 }
+*/

@@ -1,5 +1,6 @@
 package com.lartschy.beyond90.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,58 +27,16 @@ class TeamViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _favoriteTeams = MutableStateFlow<Set<String>>(emptySet())
-    val favoriteTeams: StateFlow<Set<String>> = _favoriteTeams
-
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = Firebase.firestore
-
-    fun fetchTeams(leagueName: String) {
+    fun loadTeamsForLeague(leagueName: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val result = repository.getTeamsByLeagueName(leagueName)
-                _teams.value = result
-                loadFavoriteTeams() // also load favorites after fetch
+                _teams.value = repository.getTeamsByLeague(leagueName)
             } catch (e: Exception) {
-                // handle error
+                Log.e("TeamVM", "Error fetching teams for $leagueName", e)
             } finally {
                 _isLoading.value = false
             }
         }
     }
-
-    fun toggleFavorite(team: Team) {
-        val uid = auth.currentUser?.uid ?: return
-        val teamId = team.idTeam
-
-        val userFavoritesRef = firestore.collection("users")
-            .document(uid)
-            .collection("favorites")
-            .document(teamId)
-
-        viewModelScope.launch {
-            if (_favoriteTeams.value.contains(teamId)) {
-                userFavoritesRef.delete()
-                _favoriteTeams.value = _favoriteTeams.value - teamId
-            } else {
-                userFavoritesRef.set(mapOf("teamId" to teamId))
-                _favoriteTeams.value = _favoriteTeams.value + teamId
-            }
-        }
-    }
-
-
-    private fun loadFavoriteTeams() {
-        val uid = auth.currentUser?.uid ?: return
-        firestore.collection("users").document(uid)
-            .collection("favorites")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                _favoriteTeams.value = snapshot.documents.mapNotNull { it.id }.toSet()
-            }
-    }
 }
-
-
-

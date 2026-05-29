@@ -1,41 +1,36 @@
 package com.lartschy.beyond90.ui.components
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
-import com.lartschy.beyond90.data.model.Team
-import com.lartschy.beyond90.ui.screens.FavouriteTeamScreen
-import com.lartschy.beyond90.ui.screens.FixtureScreen
-import com.lartschy.beyond90.ui.screens.HomeScreen
+import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.lartschy.beyond90.data.model.Match
+import com.lartschy.beyond90.ui.screens.FixturesScreen
+import com.lartschy.beyond90.ui.screens.LeaguePredictionScreen
+
 import com.lartschy.beyond90.ui.screens.LeagueScreen
-import com.lartschy.beyond90.ui.screens.ProfileScreen
-import com.lartschy.beyond90.ui.screens.RegistrationScreen
 import com.lartschy.beyond90.ui.screens.TeamScreen
-import com.lartschy.beyond90.viewmodel.FavoritesViewModel
+import com.lartschy.beyond90.ui.screens.UpcomingScreen
 import com.lartschy.beyond90.viewmodel.FixtureViewModel
+import com.lartschy.beyond90.viewmodel.LeagueViewModel
+import com.lartschy.beyond90.viewmodel.UpcomingViewModel
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun FootballAppUI() {
     val navController = rememberNavController()
-    val fixtureViewModel: FixtureViewModel = viewModel()
-    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
-    val favoriteTeams by favoritesViewModel.favoriteTeams.collectAsState()
-
-    LaunchedEffect(Unit) {
-        favoritesViewModel.fetchFavoriteTeams()
-    }
 
     Scaffold(
         bottomBar = {
@@ -52,35 +47,47 @@ fun FootballAppUI() {
         ) {
             NavHost(
                 navController = navController,
-                startDestination = "home"
+                startDestination = "leagues"
             ) {
-                composable("home") { HomeScreen(navController) }
+                composable("leagues") {
+                    val viewModel: LeagueViewModel = hiltViewModel()
+                    LeagueScreen(navController, viewModel)
+                }
 
-                composable("registration") { RegistrationScreen(navController) }
-
-                composable("leagues") { LeagueScreen(navController) }
-
-                composable("teams/{leagueName}") { backStackEntry ->
-                    val leagueName = backStackEntry.arguments?.getString("leagueName") ?: ""
-                    TeamScreen(leagueName = leagueName)
+                composable("teams/{leagueId}") { backStackEntry ->
+                    val leagueId = backStackEntry.arguments?.getString("leagueId") ?: ""
+                    TeamScreen(navController, leagueId)
                 }
 
                 composable("fixtures") {
-                    FixtureScreen(fixtureViewModel)
+                    FixturesScreen(navController = navController)
                 }
 
-                composable("profile") {
-                    ProfileScreen(navController = navController, favoritesViewModel = favoritesViewModel)
+                composable(
+                    route = "upcoming/{homeTeam}/{awayTeam}",
+                    arguments = listOf(
+                        navArgument("homeTeam") { type = NavType.StringType },
+                        navArgument("awayTeam") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val homeTeam = backStackEntry.arguments?.getString("homeTeam") ?: ""
+                    val awayTeam = backStackEntry.arguments?.getString("awayTeam") ?: ""
+
+                    UpcomingScreen(homeTeam = homeTeam, awayTeam = awayTeam)
                 }
 
-                composable("favouriteTeam/{teamId}") { backStackEntry ->
-                    val teamId = backStackEntry.arguments?.getString("teamId")
-                    val team = favoriteTeams.find { it.idTeam == teamId }
+                composable("league_prediction/{leagueId}") { backStackEntry ->
+                    val leagueId = backStackEntry.arguments?.getString("leagueId") ?: ""
 
-                    team?.let {
-                        FavouriteTeamScreen(team = it)
-                    }
+                    val viewModel: LeagueViewModel = hiltViewModel()
+
+                    LeaguePredictionScreen(
+                        leagueId = leagueId,
+                        viewModel = viewModel
+                    )
                 }
+
+
             }
         }
     }

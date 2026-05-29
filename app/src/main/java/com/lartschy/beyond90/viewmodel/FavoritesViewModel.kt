@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/*
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val repository: FootballRepository
@@ -58,3 +59,5 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 }
+
+*/

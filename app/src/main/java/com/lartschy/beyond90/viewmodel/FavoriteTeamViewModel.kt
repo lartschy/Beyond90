@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lartschy.beyond90.data.model.Match
 import com.lartschy.beyond90.data.model.Team
-import com.lartschy.beyond90.data.model.TeamStats
 import com.lartschy.beyond90.data.repository.FootballRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +13,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
-
+/*
 @HiltViewModel
 class FavouriteTeamViewModel @Inject constructor(
     private val repository: FootballRepository
@@ -102,3 +101,4 @@ class FavouriteTeamViewModel @Inject constructor(
         }
     }
 }
+*/

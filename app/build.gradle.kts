@@ -60,6 +60,9 @@ android {
 dependencies {
     // Hilt for Dependency Injection
     implementation("com.google.dagger:hilt-android:2.50")
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.firebase.crashlytics.buildtools)
     kapt("com.google.dagger:hilt-compiler:2.50")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
@@ -94,6 +97,15 @@ dependencies {
 
     // Kotlin standard library
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
+
+    implementation("androidx.compose.material:material-icons-extended:<compose_version>")
+
+    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.11")
+
+    implementation("io.ktor:ktor-client-core:2.3.3")
+    implementation("io.ktor:ktor-client-cio:2.3.3")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.3")
 
     // Testing
     testImplementation(libs.junit)

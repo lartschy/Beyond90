@@ -1,183 +1,285 @@
 package com.lartschy.beyond90.ui.screens
 
+import android.net.Uri
+import android.util.Log
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.google.gson.Gson
+import com.lartschy.beyond90.data.model.League
+import com.lartschy.beyond90.data.model.Match
 import com.lartschy.beyond90.data.model.Team
 import com.lartschy.beyond90.ui.components.MatchCard
 import com.lartschy.beyond90.viewmodel.FixtureViewModel
+import com.lartschy.beyond90.viewmodel.MatchFilter
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 
 @Composable
-fun FixtureScreen(
-    fixtureViewModel: FixtureViewModel = hiltViewModel()
+fun FixturesScreen(
+    navController: NavController,
+    viewModel: FixtureViewModel = hiltViewModel()
 ) {
-    val leagues by fixtureViewModel.leagues.collectAsState()
-    val teams by fixtureViewModel.teamsForSelectedLeague.collectAsState()
-    val isLoading by fixtureViewModel.isLoading.collectAsState()
-    val matchResults by fixtureViewModel.matchResults.collectAsState()
+    val leagues by viewModel.leagues.collectAsState()
+    val teams by viewModel.teams.collectAsState()
+    val matches by viewModel.matchResults.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
-    val selectedLeague = remember { mutableStateOf<String?>(null) }
-    val selectedTeam1 = remember { mutableStateOf<Team?>(null) }
-    val selectedTeam2 = remember { mutableStateOf<Team?>(null) }
-
-    val expandedLeague = remember { mutableStateOf(false) }
-    val expandedTeam1 = remember { mutableStateOf(false) }
-    val expandedTeam2 = remember { mutableStateOf(false) }
+    val selectedLeague by viewModel.selectedLeague.collectAsState()
+    val selectedTeam1 by viewModel.selectedTeam1.collectAsState()
+    val selectedTeam2 by viewModel.selectedTeam2.collectAsState()
+    val selectedFilter by viewModel.selectedFilter.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(Color(0xFFF9F9F9))
     ) {
-
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .background(
+                    Brush.horizontalGradient(listOf(Color(0xFF2E7D32), Color(0xFF66BB6A)))
+                )
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            OutlinedButton(
-                onClick = { expandedLeague.value = !expandedLeague.value },
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SelectorWhiteText(
+                    placeholder = "Select League",
+                    options = leagues.map { it.strLeague },
+                    selected = selectedLeague?.strLeague,
+                    onSelected = { league ->
+                        leagues.find { it.strLeague == league }?.let {
+                            viewModel.selectedLeague.value = it
+                            viewModel.fetchTeamsForLeague(it)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                FilterDropdownWhite(
+                    selectedFilter = selectedFilter,
+                    onFilterSelected = { viewModel.selectedFilter.value = it; viewModel.applyFilter() },
+                    modifier = Modifier.width(120.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SelectorWhiteText(
+                    placeholder = if (selectedLeague == null) "League first" else "Select Team",
+                    options = if (selectedLeague != null) teams.map { it.strTeam } else emptyList(),
+                    selected = selectedTeam1?.strTeam,
+                    onSelected = { team ->
+                        teams.find { it.strTeam == team }?.let { viewModel.selectedTeam1.value = it }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                SelectorWhiteText(
+                    placeholder = when {
+                        selectedLeague == null -> "League first"
+                        selectedTeam1 == null -> "Team first"
+                        else -> "Select Opponent"
+                    },
+                    options = if (selectedTeam1 != null) teams.filter { it != selectedTeam1 }.map { it.strTeam } else emptyList(),
+                    selected = selectedTeam2?.strTeam,
+                    onSelected = { team ->
+                        teams.find { it.strTeam == team }?.let { viewModel.selectedTeam2.value = it }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+
+        }
+        GradientButtonWhite(
+            text = "Search Matches",
+            enabled = selectedTeam1 != null && selectedTeam2 != null
+        ) { viewModel.fetchMatches() }
+
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+        val matches by viewModel.matchResults.collectAsState()
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
+        ) {
+            items(matches) { match ->
+                MatchCard(match = match) { selectedMatch ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("matchId", selectedMatch.idEvent)
+                    navController.navigate(
+                        "upcoming/${Uri.encode(match.strHomeTeam)}/${Uri.encode(match.strAwayTeam)}"
+                    )
+
+                }
+
+
+            }
+
+        }
+
+
+    }
+}
+
+@Composable
+fun SelectorWhiteText(
+    placeholder: String,
+    options: List<String>,
+    selected: String?,
+    onSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier.height(48.dp)) {
+        Button(
+            onClick = { expanded = true },
+            shape = RoundedCornerShape(24.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = selectedLeague.value ?: "Select League")
-            }
-            DropdownMenu(
-                expanded = expandedLeague.value,
-                onDismissRequest = { expandedLeague.value = false }
-            ) {
-                leagues.forEach { league ->
-                    DropdownMenuItem(
-                        text = { Text(league.strLeague) },
-                        onClick = {
-                            selectedLeague.value = league.strLeague
-                            fixtureViewModel.fetchTeamsForLeague(league.strLeague)
-                            selectedTeam1.value = null
-                            selectedTeam2.value = null
-                            expandedLeague.value = false
-                        }
-                    )
-                }
+                Text(
+                    text = selected ?: placeholder,
+                    color = Color(0xFF2E7D32),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF2E7D32))
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (selectedLeague.value != null) {
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        OutlinedButton(
-                            onClick = { expandedTeam1.value = !expandedTeam1.value },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = selectedTeam1.value?.strTeam ?: "Select Team 1")
-                        }
-                        DropdownMenu(
-                            expanded = expandedTeam1.value,
-                            onDismissRequest = { expandedTeam1.value = false }
-                        ) {
-                            teams.forEach { team ->
-                                DropdownMenuItem(
-                                    text = { Text(team.strTeam) },
-                                    onClick = {
-                                        selectedTeam1.value = team
-                                        fixtureViewModel.setSelectedTeam1(team)
-                                        if (selectedTeam2.value?.strTeam == team.strTeam) {
-                                            selectedTeam2.value = null
-                                        }
-                                        expandedTeam1.value = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        OutlinedButton(
-                            onClick = { expandedTeam2.value = !expandedTeam2.value },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = selectedTeam2.value?.strTeam ?: "Select Team 2")
-                        }
-                        DropdownMenu(
-                            expanded = expandedTeam2.value,
-                            onDismissRequest = { expandedTeam2.value = false }
-                        ) {
-                            teams.forEach { team ->
-                                if (team.strTeam != selectedTeam1.value?.strTeam) {
-                                    DropdownMenuItem(
-                                        text = { Text(team.strTeam) },
-                                        onClick = {
-                                            selectedTeam2.value = team
-                                            fixtureViewModel.setSelectedTeam2(team)
-                                            expandedTeam2.value = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    onClick = { onSelected(option); expanded = false },
+                    text = { Text(option, color = Color(0xFF2E7D32)) }
+                )
             }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = { fixtureViewModel.fetchMatchDataIfReady() },
-            enabled = selectedTeam1.value != null && selectedTeam2.value != null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-        ) {
-            Text(text = "Fetch Matches")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (matchResults.isNotEmpty()) {
-            Text(
-                text = "Matches found: ${matchResults.size}",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LazyColumn(modifier = Modifier.padding(horizontal = 8.dp)) {
-                items(matchResults) { match ->
-                    MatchCard(match)
-                }
-            }
-        } else if (!isLoading && selectedTeam1.value != null && selectedTeam2.value != null) {
-            Text(
-                text = "No matches found.",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(top = 8.dp)
-            )
         }
     }
 }
 
+@Composable
+fun FilterDropdownWhite(
+    selectedFilter: MatchFilter,
+    onFilterSelected: (MatchFilter) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val options = listOf(MatchFilter.ALL, MatchFilter.UPCOMING, MatchFilter.HISTORY)
+    var expanded by remember { mutableStateOf(false) }
 
+    Box(modifier = modifier.height(48.dp)) {
+        Button(
+            onClick = { expanded = true },
+            shape = RoundedCornerShape(24.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = when (selectedFilter) {
+                        MatchFilter.ALL -> "All"
+                        MatchFilter.UPCOMING -> "Upcoming"
+                        MatchFilter.HISTORY -> "History"
+                    },
+                    color = Color(0xFF2E7D32),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF2E7D32))
+            }
+        }
 
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { filter ->
+                DropdownMenuItem(
+                    onClick = { onFilterSelected(filter); expanded = false },
+                    text = {
+                        Text(
+                            text = when (filter) {
+                                MatchFilter.ALL -> "All"
+                                MatchFilter.UPCOMING -> "Upcoming"
+                                MatchFilter.HISTORY -> "History"
+                            },
+                            color = Color(0xFF2E7D32)
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GradientButtonWhite(
+    text: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(2.dp, Color(0xFF2E7D32)),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = Color.White,
+            contentColor = Color(0xFF2E7D32),
+            disabledContentColor = Color.LightGray,
+            disabledContainerColor = Color.White
+        ),
+        modifier = Modifier
+            .padding(horizontal = 40.dp, vertical = 12.dp)
+            .height(44.dp)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (enabled) Color(0xFF2E7D32) else Color.LightGray
+        )
+    }
+}

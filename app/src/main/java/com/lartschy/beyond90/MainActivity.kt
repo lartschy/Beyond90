@@ -3,6 +3,7 @@ package com.lartschy.beyond90
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Text
 import androidx.navigation.compose.rememberNavController
 import com.lartschy.beyond90.ui.components.FootballAppUI
@@ -14,8 +15,11 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        androidx.compose.foundation.ComposeFoundationFlags.isNonComposedClickableEnabled = false
+
         setContent {
             Beyond90Theme(
                 darkTheme = false,

@@ -24,9 +24,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lartschy.beyond90.data.model.Team
 
 @Composable
@@ -35,74 +37,80 @@ fun TeamCard(
     isFavorite: Boolean,
     onToggleFavorite: (Team) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
+    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+            elevation = CardDefaults.cardElevation(8.dp),
+            shape = RoundedCornerShape(20.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = team.strTeam,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+            Box(
+                modifier = Modifier
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF2E7D32), Color(0xFF66BB6A))
+                        )
                     )
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                team.strStadium?.let {
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
+            ) {
+                Column {
                     Text(
-                        text = "Stadium: $it",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.White)
-                    )
-                }
-
-                team.intStadiumCapacity?.let {
-                    Text(
-                        text = "Capacity: $it",
-                        style = MaterialTheme.typography.bodySmall.copy(color = Color.White.copy(alpha = 0.8f))
-                    )
-                }
-
-                if (team.allLeagues.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Leagues:",
+                        text = team.strTeam,
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
                             color = Color.White
                         )
                     )
-                    team.allLeagues.forEach { league ->
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    team.strStadium?.let {
                         Text(
-                            text = "- $league",
-                            style = MaterialTheme.typography.bodySmall.copy(color = Color.White)
+                            text = "Stadium: $it",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = Color.White)
                         )
                     }
+
+                    team.intStadiumCapacity?.let {
+                        Text(
+                            text = "Capacity: $it",
+                            style = MaterialTheme.typography.bodySmall.copy(color = Color.White.copy(alpha = 0.8f))
+                        )
+                    }
+
+                    if (team.allLeagues.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Leagues:",
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                        )
+                        team.allLeagues.forEach { league ->
+                            Text(
+                                text = "- $league",
+                                style = MaterialTheme.typography.bodySmall.copy(color = Color.White)
+                            )
+                        }
+                    }
+                }
+                IconButton(
+                    onClick = { onToggleFavorite(team) },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .background(Color.White, CircleShape)
+                        .size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorite",
+                        tint = if (isFavorite) Color.Black else Color.LightGray
+                    )
                 }
             }
-        }
-
-        IconButton(
-            onClick = { onToggleFavorite(team) },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp)
-                .background(Color.White, CircleShape)
-                .size(36.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = "Favorite",
-                tint = if (isFavorite) Color.Black else Color.LightGray
-            )
         }
     }
 }
