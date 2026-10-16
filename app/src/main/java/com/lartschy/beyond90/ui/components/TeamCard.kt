@@ -107,8 +107,7 @@ fun TeamCard(
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = "Favorite",
-                        tint = if (isFavorite) Color.Black else Color.LightGray
-                    )
+                        tint = if (isFavorite) Color.Red else Color.LightGray                    )
                 }
             }
         }

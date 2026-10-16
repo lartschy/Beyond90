@@ -58,6 +58,13 @@ class FixtureViewModel @Inject constructor(
         isLoading.value = true
         val matches = repository.searchMatch(team1.strTeam, team2.strTeam) +
                 repository.searchMatch(team2.strTeam, team1.strTeam)
+
+        matches.forEach {
+            Log.d(
+                "MATCH",
+                "${it.strHomeTeam} vs ${it.strAwayTeam} | date=${it.dateEvent} | local=${it.dateEventLocal} | strDate=${it.strDate}"
+            )
+        }
         allMatches.value = matches
         applyFilter()
         isLoading.value = false

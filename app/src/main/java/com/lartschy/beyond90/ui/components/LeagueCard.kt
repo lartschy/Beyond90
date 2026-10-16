@@ -1,44 +1,34 @@
 package com.lartschy.beyond90.ui.components
 
-import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.lartschy.beyond90.data.model.League
 
 @Composable
@@ -49,55 +39,99 @@ fun LeagueCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(22.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2E7D32) // sima zöld
-        ),
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = RoundedCornerShape(16.dp)
+            containerColor = Color.Transparent
+        )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF1B5E20),
+                            Color(0xFF388E3C),
+                            Color(0xFF43A047)
+                        )
+                    )
+                )
+                .padding(20.dp)
         ) {
 
-            // Liga neve
+            // League title
             Text(
                 text = league.strLeague,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            league.strLeagueAlternate?.takeIf { it.isNotBlank() }?.let {
+                Spacer(modifier = Modifier.height(4.dp))
 
-            // Gombok
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            HorizontalDivider(
+                color = Color.White.copy(alpha = 0.2f)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
                 Button(
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         navController.navigate("teams/${league.strLeague}")
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White
-                    )
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF1B5E20)
+                    ),
+                    shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text("Teams", color = Color(0xFF2E7D32))
+                    Icon(
+                        Icons.Default.Groups,
+                        contentDescription = null
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text("Teams")
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
-
                 Button(
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         navController.navigate("league_prediction/${league.idLeague}")
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White
-                    )
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF1B5E20)
+                    ),
+                    shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text("Prediction", color = Color(0xFF2E7D32))
+                    Icon(
+                        Icons.Default.EmojiEvents,
+                        contentDescription = null
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text("Predict")
                 }
             }
         }

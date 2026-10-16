@@ -1,6 +1,5 @@
 package com.lartschy.beyond90.ui.screens
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +18,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,19 +38,40 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.lartschy.beyond90.viewmodel.AuthViewModel
 
-
 @Composable
 fun RegistrationScreen(navController: NavController) {
+
     val authViewModel: AuthViewModel = viewModel()
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
 
-    var fullName by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
     val cornerRadius = 16.dp
+
+    LaunchedEffect(authState) {
+        authState?.let { message ->
+
+            Toast.makeText(
+                context,
+                message,
+                Toast.LENGTH_LONG
+            ).show()
+
+            if (message.contains("successful", ignoreCase = true)) {
+                navController.navigate("leagues") {
+                    popUpTo("registration") {
+                        inclusive = true
+                    }
+                }
+            }
+
+            authViewModel.clearState()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -59,31 +79,41 @@ fun RegistrationScreen(navController: NavController) {
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
+
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text(
                 text = "Register",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
                 color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Username
             OutlinedTextField(
-                value = fullName,
-                onValueChange = { fullName = it },
-                label = { Text("Full Name") },
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
+                prefix = { Text("@") },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(cornerRadius)),
-                shape = RoundedCornerShape(cornerRadius)
+                shape = RoundedCornerShape(cornerRadius),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Ascii
+                )
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Email
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -93,11 +123,14 @@ fun RegistrationScreen(navController: NavController) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(cornerRadius)),
                 shape = RoundedCornerShape(cornerRadius),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Email
+                )
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Password
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -112,6 +145,7 @@ fun RegistrationScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Confirm Password
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
@@ -128,41 +162,69 @@ fun RegistrationScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    if (fullName.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                    } else if (password != confirmPassword) {
-                        Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                    } else {
-                        authViewModel.register(email, password)
+
+                    when {
+
+                        username.isBlank() ||
+                                email.isBlank() ||
+                                password.isBlank() ||
+                                confirmPassword.isBlank() -> {
+
+                            Toast.makeText(
+                                context,
+                                "Please fill in all fields",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        password != confirmPassword -> {
+
+                            Toast.makeText(
+                                context,
+                                "Passwords do not match",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        else -> {
+
+                            authViewModel.register(
+                                username = username.trim(),
+                                email = email.trim(),
+                                password = password
+                            )
+                        }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(cornerRadius)),
-                shape = RoundedCornerShape(cornerRadius)
+                shape = RoundedCornerShape(cornerRadius),
+                enabled = username.isNotBlank() &&
+                        email.isNotBlank() &&
+                        password.isNotBlank() &&
+                        confirmPassword.isNotBlank()
             ) {
                 Text("Register")
-            }
-
-            authState?.let { message ->
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                if (message.contains("successful", ignoreCase = true)) {
-                    navController.navigate("leagues")
-                }
-                authViewModel.clearState()
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
                 onClick = {
-                    navController.popBackStack("home", inclusive = false)
+                    navController.popBackStack(
+                        "home",
+                        inclusive = false
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(cornerRadius)),
                 shape = RoundedCornerShape(cornerRadius),
-                border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+                border = BorderStroke(
+                    1.dp,
+                    Color(0xFF4CAF50)
+                ),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = Color(0xFF4CAF50)
                 )

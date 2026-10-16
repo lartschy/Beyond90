@@ -30,8 +30,38 @@ class TeamViewModel @Inject constructor(
     fun loadTeamsForLeague(leagueName: String) {
         viewModelScope.launch {
             _isLoading.value = true
+
             try {
-                _teams.value = repository.getTeamsByLeague(leagueName)
+                val loadedTeams = repository.getTeamsByLeague(leagueName)
+
+                Log.d("TeamVM", "========== TEAMS LOADED ==========")
+                Log.d("TeamVM", "League: $leagueName")
+                Log.d("TeamVM", "Number of teams: ${loadedTeams.size}")
+
+                loadedTeams.forEach { team ->
+                    Log.d(
+                        "TeamVM",
+                        """
+                    Team:
+                    idTeam = ${team.idTeam}
+                    strTeam = ${team.strTeam}
+                    strTeamBadge = ${team.strTeamBadge}
+                    strLeague = ${team.strLeague}
+                    strLeague2 = ${team.strLeague2}
+                    strLeague3 = ${team.strLeague3}
+                    strLeague4 = ${team.strLeague4}
+                    strLeague5 = ${team.strLeague5}
+                    strLeague6 = ${team.strLeague6}
+                    strLeague7 = ${team.strLeague7}
+                    strStadium = ${team.strStadium}
+                    intStadiumCapacity = ${team.intStadiumCapacity}
+                    allLeagues = ${team.allLeagues}
+                    """.trimIndent()
+                    )
+                }
+
+                _teams.value = loadedTeams
+
             } catch (e: Exception) {
                 Log.e("TeamVM", "Error fetching teams for $leagueName", e)
             } finally {

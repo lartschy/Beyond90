@@ -42,20 +42,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.lartschy.beyond90.ui.components.TeamCard
+import com.lartschy.beyond90.viewmodel.FavoritesViewModel
 import com.lartschy.beyond90.viewmodel.TeamViewModel
 
 @Composable
 fun TeamScreen(
     navController: NavHostController,
     leagueName: String,
-    viewModel: TeamViewModel = hiltViewModel()
+    viewModel: TeamViewModel = hiltViewModel(),
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     val teams by viewModel.teams.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val favoriteTeamIds by favoritesViewModel.favoriteTeamIds.collectAsState()
 
     LaunchedEffect(leagueName) {
         viewModel.loadTeamsForLeague(leagueName)
     }
+
+    LaunchedEffect(Unit) { favoritesViewModel.loadFavorites() }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -76,11 +81,7 @@ fun TeamScreen(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 items(teams) { team ->
-                    TeamCard(
-                        team = team,
-                        isFavorite = false,
-                        onToggleFavorite = { /*viewModel.toggleFavorite(it)*/ }
-                    )
+                    TeamCard( team = team, isFavorite = favoriteTeamIds.contains(team.idTeam), onToggleFavorite = { favoritesViewModel.toggleFavorite(it) } )
                 }
             }
         }

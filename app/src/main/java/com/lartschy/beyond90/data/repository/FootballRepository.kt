@@ -89,6 +89,21 @@ class FootballRepository(
             null
         }
     }
+
+    suspend fun getUpcomingMatches(
+        leagueId: String
+    ): List<Match> {
+        return try {
+            apiService.getUpcomingMatches(leagueId).events ?: emptyList()
+        } catch (e: Exception) {
+            Log.e(
+                "FootballRepository",
+                "Error fetching upcoming matches for league $leagueId",
+                e
+            )
+            emptyList()
+        }
+    }
 }
 
 

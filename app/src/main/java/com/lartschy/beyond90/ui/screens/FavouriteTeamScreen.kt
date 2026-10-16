@@ -20,9 +20,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.lartschy.beyond90.data.model.Team
 import com.lartschy.beyond90.ui.components.MatchCard
-/*
+
 @Composable
 fun FavouriteTeamScreen(team: Team) {
+    /*
     val viewModel: FavouriteTeamViewModel = hiltViewModel()
     val matches by viewModel.matchesAgainstLeague.collectAsState()
     val stats by viewModel.teamStats.collectAsState()
@@ -73,7 +74,7 @@ fun FavouriteTeamScreen(team: Team) {
                 }
             }
         }
-    }
+    }*/
 }
 
 @Composable
@@ -95,4 +96,3 @@ fun LegendItem(color: Color, label: String) {
     }
 }
 
-*/

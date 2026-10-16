@@ -15,26 +15,42 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.lartschy.beyond90.data.model.Match
+import com.lartschy.beyond90.ui.screen.PredictionScreen
 import com.lartschy.beyond90.ui.screens.FixturesScreen
+import com.lartschy.beyond90.ui.screens.HomeScreen
 import com.lartschy.beyond90.ui.screens.LeaguePredictionScreen
 
 import com.lartschy.beyond90.ui.screens.LeagueScreen
+import com.lartschy.beyond90.ui.screens.RegistrationScreen
 import com.lartschy.beyond90.ui.screens.TeamScreen
 import com.lartschy.beyond90.ui.screens.UpcomingScreen
 import com.lartschy.beyond90.viewmodel.FixtureViewModel
 import com.lartschy.beyond90.viewmodel.LeagueViewModel
 import com.lartschy.beyond90.viewmodel.UpcomingViewModel
+import com.lartschy.beyond90.ui.screens.ProfileScreen
+import com.lartschy.beyond90.viewmodel.PredictionViewModel
 
-@SuppressLint("StateFlowValueCalledInComposition")
+@SuppressLint("StateFlowValueCalledInComposition", "ViewModelConstructorInComposable")
 @Composable
 fun FootballAppUI() {
     val navController = rememberNavController()
 
+    val auth = FirebaseAuth.getInstance()
+
+    val startDestination = if (auth.currentUser != null) {
+        "leagues"
+    } else {
+        "home"
+    }
+
     Scaffold(
         bottomBar = {
-            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+            val currentRoute =
+                navController.currentBackStackEntryAsState().value?.destination?.route
+
             if (currentRoute != "home" && currentRoute != "registration") {
                 BottomNavigationBar(navController)
             }
@@ -49,6 +65,14 @@ fun FootballAppUI() {
                 navController = navController,
                 startDestination = "leagues"
             ) {
+                composable("home") {
+                    HomeScreen(navController)
+                }
+
+                composable("registration") {
+                    RegistrationScreen(navController)
+                }
+
                 composable("leagues") {
                     val viewModel: LeagueViewModel = hiltViewModel()
                     LeagueScreen(navController, viewModel)
@@ -87,7 +111,16 @@ fun FootballAppUI() {
                     )
                 }
 
+                composable("prediction") {
+                    PredictionScreen(
+                        navController = navController,
+                        viewModel = hiltViewModel()
+                    )
+                }
 
+                composable("profile") {
+                    ProfileScreen(navController)
+                }
             }
         }
     }

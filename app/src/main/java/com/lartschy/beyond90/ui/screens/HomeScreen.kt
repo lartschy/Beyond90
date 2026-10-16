@@ -59,7 +59,11 @@ fun HomeScreen(navController: NavController) {
         authState?.let { message ->
             if (message.contains("successful", ignoreCase = true)) {
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                navController.navigate("leagues")
+                navController.navigate("leagues") {
+                    popUpTo("home") {
+                        inclusive = true
+                    }
+                }
                 errorMessage = null
             } else {
                 errorMessage = message

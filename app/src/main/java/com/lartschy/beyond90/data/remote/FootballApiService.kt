@@ -8,6 +8,7 @@ import com.lartschy.beyond90.data.model.StatsRequest
 import com.lartschy.beyond90.data.model.StatsResponse
 import com.lartschy.beyond90.data.model.TeamResponse
 import com.lartschy.beyond90.data.model.TrainResponse
+import com.lartschy.beyond90.data.model.UpcomingMatchesResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -39,4 +40,9 @@ interface FootballApiService {
     suspend fun predictLeague(
         @Query("league_id") leagueId: String
     ): LeaguePredictionResponse
+
+    @GET("api/upcoming_matches/{leagueId}")
+    suspend fun getUpcomingMatches(
+        @Path("leagueId") leagueId: String
+    ): UpcomingMatchesResponse
 }

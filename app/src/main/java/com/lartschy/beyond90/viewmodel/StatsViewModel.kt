@@ -11,13 +11,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/*
+
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val repository: FootballRepository
 ) : ViewModel() {
 
-    var stats by mutableStateOf<StatsResponse?>(null)
+    /*var stats by mutableStateOf<StatsResponse?>(null)
         private set
 
     var isLoading by mutableStateOf(false)
@@ -35,6 +35,5 @@ class StatsViewModel @Inject constructor(
                 isLoading = false
             }
         }
-    }
+    }*/
 }
-*/

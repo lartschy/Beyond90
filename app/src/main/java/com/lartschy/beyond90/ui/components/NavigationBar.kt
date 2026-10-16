@@ -22,6 +22,7 @@ fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
         BottomNavItem("leagues", Icons.Default.Star, "Leagues"),
         BottomNavItem("fixtures", Icons.Default.DateRange, "Fixtures"),
+        BottomNavItem("prediction", Icons.Default.SportsSoccer, "Predict"),
         BottomNavItem("profile", Icons.Default.Person, "Profile")
     )
 

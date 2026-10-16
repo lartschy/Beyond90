@@ -1,5 +1,5 @@
 package com.lartschy.beyond90.viewmodel
-
+/*
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
-/*
+
 @HiltViewModel
 class FavouriteTeamViewModel @Inject constructor(
     private val repository: FootballRepository
@@ -21,7 +21,7 @@ class FavouriteTeamViewModel @Inject constructor(
 
     private val _matchesAgainstLeague = MutableStateFlow<List<Match>>(emptyList())
     val matchesAgainstLeague: StateFlow<List<Match>> = _matchesAgainstLeague
-
+/*
     private val _teamStats = MutableStateFlow<List<TeamStats>>(emptyList())
     val teamStats: StateFlow<List<TeamStats>> = _teamStats
 
@@ -89,6 +89,8 @@ class FavouriteTeamViewModel @Inject constructor(
             }
         }
     }
+
+ */
 
     private fun formatTimeToHourMinute(time: String): String {
         return try {
